@@ -5,9 +5,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UploadService } from './upload.service';
 import { UploadController } from './upload.controller';
 
+import { EventsModule } from 'src/events/events.module';
+
 @Module({
   imports: [
     ConfigModule,
+    EventsModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
