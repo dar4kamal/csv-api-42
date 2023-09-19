@@ -3,6 +3,7 @@ import { Model, PipelineStage } from 'mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { Record } from './record.schema';
+import FilterRecordsDTO from './dto/filter-records.dto';
 import FindByCountryDTO from './dto/find-by-country.dto';
 
 @Injectable()
@@ -41,6 +42,21 @@ export class RecordsService {
     const { country } = params;
     const data = await this.recordModel
       .find({ ref_area: country })
+      .select('-_id');
+
+    return data;
+  }
+
+  async getAllRecords(params: FilterRecordsDTO) {
+    const { sex, country, ageGroup, year } = params;
+
+    const data = await this.recordModel
+      .find({
+        ...(sex ? { sex } : {}),
+        ...(year ? { time: +year } : {}),
+        ...(country ? { ref_area: country } : {}),
+        ...(ageGroup ? { classif1: ageGroup } : {}),
+      })
       .select('-_id');
 
     return data;
