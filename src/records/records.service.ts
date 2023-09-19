@@ -3,6 +3,7 @@ import { Model, PipelineStage } from 'mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { Record } from './record.schema';
+import FindByCountryDTO from './dto/find-by-country.dto';
 
 @Injectable()
 export class RecordsService {
@@ -32,6 +33,15 @@ export class RecordsService {
     const data = await this.recordModel
       .find({ time: latestYear.value })
       .select('-_id ref_area obs_value');
+
+    return data;
+  }
+
+  async getCountryRecords(params: FindByCountryDTO) {
+    const { country } = params;
+    const data = await this.recordModel
+      .find({ ref_area: country })
+      .select('-_id');
 
     return data;
   }
