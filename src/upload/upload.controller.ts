@@ -1,10 +1,13 @@
 import {
   Post,
+  HttpCode,
+  HttpStatus,
   Controller,
   UploadedFile,
   ParseFilePipe,
   UseInterceptors,
   FileTypeValidator,
+  BadRequestException,
 } from '@nestjs/common';
 import { chunk } from 'lodash';
 import { ConfigService } from '@nestjs/config';
@@ -23,11 +26,18 @@ export class UploadController {
   ) {}
 
   @Post('csv')
+  @HttpCode(HttpStatus.OK)
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileTypeValidator({ fileType: 'text/csv' })],
+        exceptionFactory: (error: string) =>
+          new BadRequestException([
+            error.includes('text/csv')
+              ? 'only text/csv file type is supported'
+              : 'no file was provided',
+          ]),
       }),
     )
     file: Express.Multer.File,
