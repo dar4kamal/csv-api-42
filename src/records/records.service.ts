@@ -1,6 +1,12 @@
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, PipelineStage } from 'mongoose';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 import { Record } from './record.schema';
 import FilterRecordsDTO from './dto/filter-records.dto';
@@ -8,13 +14,26 @@ import FindByCountryDTO from './dto/find-by-country.dto';
 
 @Injectable()
 export class RecordsService {
-  constructor(@InjectModel(Record.name) private recordModel: Model<Record>) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectModel(Record.name) private recordModel: Model<Record>,
+  ) {}
 
   async insertBatches(batch: Record[], batchIdx: number) {
     try {
       console.time(`Batch ${batchIdx} took`);
       await this.recordModel.insertMany(batch);
       console.timeEnd(`Batch ${batchIdx} took`);
+    } catch (error) {
+      console.log(error.message);
+      await this.reInsertBatch(batchIdx);
+    }
+  }
+
+  async reInsertBatch(batchIdx: number) {
+    try {
+      const cached: Record[] = await this.cacheManager.get(`batch-${batchIdx}`);
+      await this.recordModel.insertMany(cached);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

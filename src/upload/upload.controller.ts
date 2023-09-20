@@ -53,6 +53,7 @@ export class UploadController {
     );
 
     dataChunks.forEach((batch, idx) => {
+      this.eventEmitter.emit('cache.batch', new InsertBatchEvent(idx, batch));
       this.eventEmitter.emit('insert.batch', new InsertBatchEvent(idx, batch));
     });
 
