@@ -13,7 +13,9 @@ import { ResponseTransformInterceptor } from './common/response-transform.interc
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.DATABASE_URL),
+    MongooseModule.forRoot(
+      `mongodb://${process.env.DATABASE_IP}:27017/${process.env.DATABASE_NAME}`,
+    ),
     UploadModule,
     RecordsModule,
   ],

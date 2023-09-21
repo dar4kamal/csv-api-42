@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  api:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - '${PORT}:${PORT}'
+    depends_on:
+      - database
+
+  database:
+    image: mongo:6.0
+    container_name: ${DATABASE_IP}
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '27017:27017'

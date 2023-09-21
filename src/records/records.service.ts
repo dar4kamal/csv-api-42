@@ -1,6 +1,10 @@
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, PipelineStage } from 'mongoose';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { Record } from './record.schema';
 import FilterRecordsDTO from './dto/filter-records.dto';
@@ -30,6 +34,10 @@ export class RecordsService {
     const [latestYear] = await this.recordModel.aggregate(
       getLatestYearPipeline,
     );
+    if (!latestYear)
+      throw new NotFoundException(
+        'No records were found, please upload csv first',
+      );
 
     const data = await this.recordModel
       .find({ time: latestYear.value })
